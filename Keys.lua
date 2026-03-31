@@ -1,176 +1,157 @@
--- Script for Blackout: Revival [FREE ZOMBIES] (Place ID: 8767500166)
--- Executed with Synapse X
+-- ============================================================
+--   BLACK OUT REVIVAL - GitHub Script Loader
+--   Game ID : 8767500166
+--   Owner ID : 1591288741
+--   Side     : Server Script (place inside ServerScriptService)
+-- ============================================================
 
-if not game:IsLoaded() then
-    game.Loaded:Wait()
+local HttpService   = game:GetService("HttpService")
+local Players       = game:GetService("Players")
+local RunService    = game:GetService("RunService")
+
+-- ──────────────────────────────────────────────
+--  CONFIGURATION  (edit these to match your repo)
+-- ──────────────────────────────────────────────
+local CONFIG = {
+    -- Paste your raw GitHub URL here:
+    -- e.g. "https://raw.githubusercontent.com/YourUser/YourRepo/main/script.lua"
+    GITHUB_URL   = "https://raw.githubusercontent.com/YourUser/YourRepo/main/script.lua",
+
+    -- Your Roblox Player ID — you get full owner privileges
+    OWNER_ID     = 1591288741,
+
+    -- How often (seconds) to auto-refresh the script from GitHub (0 = disabled)
+    AUTO_RELOAD  = 0,
+
+    -- Print debug info to the output console
+    DEBUG        = true,
+}
+
+-- ──────────────────────────────────────────────
+--  UTILITIES
+-- ──────────────────────────────────────────────
+local function log(msg)
+    if CONFIG.DEBUG then
+        print("[BOR Loader] " .. tostring(msg))
+    end
 end
 
-if game.PlaceId == 8767500166 then
-    -- Load Aimbot V2 Main Script
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Main.lua"))()
+local function warn(msg)
+    warn("[BOR Loader] ⚠️  " .. tostring(msg))
+end
 
-    -- Load Aimbot V2 GUI
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Aimbot%20V2%20GUI.lua"))()
+local function isOwner(player)
+    return player and player.UserId == CONFIG.OWNER_ID
+end
 
-    -- Load Raw Main if needed
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Raw%20Main.lua"))()
+-- ──────────────────────────────────────────────
+--  GITHUB FETCH & EXECUTE
+-- ──────────────────────────────────────────────
+local loadedEnv = {}   -- shared environment table between reloads
 
-    -- Configure Aimbot Settings
-    getgenv().Aimbot.Settings = {
-        SendNotifications = true,
-        SaveSettings = false, -- Re-execute upon changing
-        ReloadOnTeleport = true,
-        Enabled = true,
-        TeamCheck = false,
-        AliveCheck = true,
-        WallCheck = false, -- Laggy
-        Sensitivity = 0, -- Animation length (in seconds) before fully locking onto target
-        ThirdPerson = false, -- Uses mousemoverel instead of CFrame to support locking in third person (could be choppy)
-        ThirdPersonSensitivity = 3, -- Boundary: 0.1 - 5
-        TriggerKey = "MouseButton2",
-        Toggle = false,
-        LockPart = "Head" -- Body part to lock on (Character part's name)
-    }
+local function fetchAndRun()
+    log("Fetching script from GitHub...")
 
-    getgenv().Aimbot.FOVSettings = {
-        Enabled = true,
-        Visible = true,
-        Amount = 90,
-        Color = "255, 255, 255",
-        LockedColor = "255, 70, 70",
-        Transparency = 0.5,
-        Sides = 60,
-        Thickness = 1,
-        Filled = false
-    }
+    local success, result = pcall(function()
+        return HttpService:GetAsync(CONFIG.GITHUB_URL, true)
+    end)
 
-    -- Additional configurations
-    getgenv().Aimbot.Settings.Enabled = true
-    getgenv().Aimbot.FOVSettings.Color = "50, 255, 70"
-    getgenv().Aimbot.FOVSettings.Enabled = false
-    getgenv().Aimbot.Settings.ThirdPerson = true
-    getgenv().Aimbot.Settings.ThirdPersonSensitivity = 3
-    getgenv().Aimbot.Settings.SaveSettings = false
-
-    -- Delete settings if needed
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Delete%20Settings%20-%20Fix%20Script.lua"))()
-
-    -- Set trigger key
-    getgenv().Aimbot.Settings.TriggerKey = "E"
-
-    -- Reset settings
-    getgenv().Aimbot.Functions:ResetSettings()
-
-    -- WebSocket for remote execution (Synapse Executer)
-    local WebSocket = assert(
-        WebSocket or Websocket or websocket or (syn and syn.websocket),
-        "Your executor is missing a websocket API!"
-    )
-
-    while true do
-        local success, client = pcall(WebSocket.connect, "ws://localhost:33882/")
-        if success then
-            client.OnMessage:Connect(function(payload)
-                local callback, exception = loadstring(payload)
-                if exception then
-                    error(exception, 2)
-                end
-                task.spawn(callback)
-            end)
-            client.OnClose:Wait()
-        end
-        task.wait(1)
+    if not success then
+        warn("HTTP request failed: " .. tostring(result))
+        warn("Make sure HttpService is ENABLED in Game Settings > Security.")
+        return false
     end
-else
-    warn("This script is for Blackout: Revival [FREE ZOMBIES] (Place ID: 8767500166). Current Place ID: " .. game.PlaceId)
--- Script for Blackout: Revival [FREE ZOMBIES] (Place ID: 8767500166)
--- Executed with Synapse X
 
-if game.PlaceId == 8767500166 then
-    -- Load Aimbot V2
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Main.lua"))()
+    log("Script fetched successfully (" .. #result .. " bytes). Executing...")
 
-    -- Configure Aimbot Settings
-    getgenv().Aimbot.Settings = {
-        SendNotifications = true,
-        SaveSettings = false, -- Re-execute upon changing
-        ReloadOnTeleport = true,
-        Enabled = true,
-        TeamCheck = false,
-        AliveCheck = true,
-        WallCheck = false, -- Laggy
-        Sensitivity = 0, -- Animation length (in seconds) before fully locking onto target
-        ThirdPerson = false, -- Uses mousemoverel instead of CFrame to support locking in third person (could be choppy)
-        ThirdPersonSensitivity = 3, -- Boundary: 0.1 - 5
-        TriggerKey = "MouseButton2",
-        Toggle = false,
-        LockPart = "Head" -- Body part to lock on (Character part's name)
-    }
-
-    getgenv().Aimbot.FOVSettings = {
-        Enabled = true,
-        Visible = true,
-        Amount = 90,
-        Color = "255, 255, 255",
-        LockedColor = "255, 70, 70",
-        Transparency = 0.5,
-        Sides = 60,
-        Thickness = 1,
-        Filled = false
-    }
-
-    -- Additional configurations
-    getgenv().Aimbot.Settings.Enabled = true
-    getgenv().Aimbot.FOVSettings.Color = "50, 255, 70"
-    getgenv().Aimbot.FOVSettings.Enabled = false
-    getgenv().Aimbot.Settings.ThirdPerson = true
-    getgenv().Aimbot.Settings.ThirdPersonSensitivity = 3
-    getgenv().Aimbot.Settings.SaveSettings = false
-
-    -- Delete settings if needed
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Delete%20Settings%20-%20Fix%20Script.lua"))()
-
-    -- Set trigger key
-    getgenv().Aimbot.Settings.TriggerKey = "E"
-
-    -- Reset settings
-    getgenv().Aimbot.Functions:ResetSettings()
-
-    -- WebSocket for remote execution
-    local WebSocket = assert(
-        WebSocket or Websocket or websocket or (syn and syn.websocket),
-        "Your executor is missing a websocket API!"
-    )
-
-    while true do
-        local success, client = pcall(WebSocket.connect, "ws://localhost:33882/")
-        if success then
-            client.OnMessage:Connect(function(payload)
-                local callback, exception = loadstring(payload)
-                if exception then
-                    error(exception, 2)
-                end
-                task.spawn(callback)
-            end)
-            client.OnClose:Wait()
-        end
-        task.wait(1)
+    local fn, compileErr = loadstring(result)
+    if not fn then
+        warn("Compile error in remote script: " .. tostring(compileErr))
+        return false
     end
-else
-    warn("This script is for Blackout: Revival [FREE ZOMBIES] (Place ID: 8767500166). Current Place ID: " .. game.PlaceId)
-# Docker has specific installation instructions for each operating system.
-# Please refer to the official documentation at https://docker.com/get-started/
 
-# Pull the Node.js Docker image:
-docker pull node:24-alpine
+    -- Pass shared environment data (owner id, players, etc.) via _G
+    _G.BOR = _G.BOR or {}
+    _G.BOR.OwnerID  = CONFIG.OWNER_ID
+    _G.BOR.GameID   = 8767500166
+    _G.BOR.Reload   = fetchAndRun  -- allow remote script to trigger a reload
 
-# Create a Node.js container and start a Shell session:
-docker run -it --rm --entrypoint sh node:24-alpine
+    local runSuccess, runErr = pcall(fn)
+    if not runSuccess then
+        warn("Runtime error in remote script: " .. tostring(runErr))
+        return false
+    end
 
-# Verify the Node.js version:
-node -v # Should print "v24.14.1".
+    log("✅ Remote script executed successfully!")
+    return true
+end
 
-# Verify npm version:
-npm -v # Should print "11.11.0".
+-- ──────────────────────────────────────────────
+--  OWNER COMMANDS  (chat-based)
+-- ──────────────────────────────────────────────
+Players.PlayerAdded:Connect(function(player)
+    if isOwner(player) then
+        log("👑 Owner joined: " .. player.Name)
 
+        player.Chatted:Connect(function(msg)
+            local cmd = msg:lower():gsub("^%s+", "")  -- trim whitespace
+
+            -- !reload  →  pull latest script from GitHub
+            if cmd == "!reload" then
+                log("Owner triggered reload.")
+                fetchAndRun()
+
+            -- !players  →  list all players in server
+            elseif cmd == "!players" then
+                local names = {}
+                for _, p in ipairs(Players:GetPlayers()) do
+                    table.insert(names, p.Name .. " (" .. p.UserId .. ")")
+                end
+                log("Players in server:\n  " .. table.concat(names, "\n  "))
+
+            -- !kick <name>  →  kick a player
+            elseif cmd:sub(1, 5) == "!kick" then
+                local targetName = cmd:sub(7)
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p.Name:lower() == targetName:lower() then
+                        p:Kick("You were kicked by the server owner.")
+                        log("Kicked player: " .. p.Name)
+                        return
+                    end
+                end
+                warn("Player not found: " .. targetName)
+
+            -- !shutdown  →  shut down the server
+            elseif cmd == "!shutdown" then
+                log("Owner triggered shutdown.")
+                for _, p in ipairs(Players:GetPlayers()) do
+                    p:Kick("Server is shutting down. Thanks for playing Black Out Revival!")
+                end
+            end
+        end)
+    end
+end)
+
+-- ──────────────────────────────────────────────
+--  AUTO-RELOAD LOOP
+-- ──────────────────────────────────────────────
+if CONFIG.AUTO_RELOAD > 0 then
+    task.spawn(function()
+        while true do
+            task.wait(CONFIG.AUTO_RELOAD)
+            log("Auto-reloading from GitHub...")
+            fetchAndRun()
+        end
+    end)
+end
+
+-- ──────────────────────────────────────────────
+--  INITIAL LOAD
+-- ──────────────────────────────────────────────
+task.spawn(fetchAndRun)
+
+log("Loader initialized for Black Out Revival (ID: 8767500166)")
+log("Owner ID: " .. CONFIG.OWNER_ID)
+</parameter>
+</invoke>
 

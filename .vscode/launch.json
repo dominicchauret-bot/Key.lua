@@ -1,0 +1,23 @@
+// server.js
+const WebSocket = require("ws");
+const readline = require("readline");
+const wss = new WebSocket.Server({ port: 33882 });
+
+console.log("WebSocket server running ws://localhost:33882");
+
+let clients = [];
+wss.on("connection", ws => {
+  clients.push(ws);
+  console.log("Client connected");
+  ws.on("message", msg => console.log("Client:", msg.toString()));
+  ws.on("close", () => { clients = clients.filter(c => c !== ws); console.log("Client disconnected"); });
+});
+
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "> "});
+rl.prompt();
+rl.on("line", line => {
+  let str = line.trim();
+  if(str == "exit") return process.exit(0);
+  clients.forEach(c => c.readyState === WebSocket.OPEN && c.send(str));
+  rl.prompt();
+});
